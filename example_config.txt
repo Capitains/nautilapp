@@ -1,0 +1,3 @@
+/home/thibault/dev/canonicals/canonical-latinLit
+/home/thibault/dev/canonicals/canonical-greekLit
+
