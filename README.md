@@ -19,7 +19,7 @@ Download the matching binaries and have fun!
 ## How to use
 
 1. First, download the application for your own environment
-2. Download at list one corpus (Example : [Perseus Canonical Latin Literature](https://github.com/PerseusDL/canonical-latinLit/archive/master.zip)), unzip it#
+2. Download at least one corpus (Example : [Perseus Canonical Latin Literature](https://github.com/PerseusDL/canonical-latinLit/archive/master.zip)), unzip it#
 3. Open the Application
 4. ![Click on load a directory](images/step1.png)
 5. ![Select the directory containing the corpus, it should have a data subfolder](images/step2.png)
