@@ -3,7 +3,9 @@ Nautilapp
 
 NautilApp provide a Graphical User Interface (GUI) that helps you run your own Nautilus and Nemo API, two web servers that allows you to browse your own corpora and the corpora from established projects such as the Perseus Digital Library. 
 
-![](images/screenshot.png)
+It provides a basic interface such as the one available at http://cts.perseids.org
+
+![Screenshot](images/screenshot.png)
 
 
 ## Download
@@ -11,8 +13,8 @@ NautilApp provide a Graphical User Interface (GUI) that helps you run your own N
 Download the matching binaries and have fun!
 
 - [NautilApp for Windows](https://github.com/Capitains/nautilapp/raw/master/dist/NautilusApp.exe)
-- [NautilApp for Mac](https://github.com/Capitains/nautilapp/raw/master/dist/NautilusApp.app)
-- [NautilApp for Ubuntu](https://github.com/Capitains/nautilapp/raw/master/dist/NautilusApp)
+- [NautilApp for Mac](https://github.com/Capitains/nautilapp/raw/master/dist/NautilusAppMac)
+- [NautilApp for Ubuntu](https://github.com/Capitains/nautilapp/raw/master/dist/NautilusAppUbuntu)
 
 ## How to use
 
