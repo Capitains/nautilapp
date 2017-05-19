@@ -1,1 +1,5 @@
 capitains-nautilus>=1.0.0
+flask_nemo>=1.0.0
+pyinstaller
+requests
+jinja2==2.8.1

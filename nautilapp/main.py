@@ -9,8 +9,29 @@ from capitains_nautilus.cts.resolver import NautilusCTSResolver
 from flask import Flask, request
 import webbrowser
 import os
+import rdflib.plugins
+import rdflib.plugins.memory
 import re
+import logging
+import requests
+import sys
+from flask_nemo import Nemo
 SPACES = re.compile(r'\s+')
+
+
+class WidgetLogger(logging.Handler):
+    def __init__(self, widget):
+        logging.Handler.__init__(self)
+        self.setLevel(logging.DEBUG)
+        self.widget = widget
+        self.widget.config(state=Tkconstants.DISABLED)
+
+    def emit(self, record):
+        self.widget.config(state=Tkconstants.NORMAL)
+        # Append message (record) to the widget
+        self.widget.insert(END, self.format(record) + '\n')
+        self.widget.see(END)  # Scroll to the bottom
+        self.widget.config(state=Tkconstants.DISABLED)
 
 
 class StoppableThread(threading.Thread):
@@ -55,6 +76,7 @@ class Editor(Tkinter.Frame):
         self.text["width"] = 50
         self.text["height"] = 20
         self.text.pack({"side": "left"})
+        self.text.state=Tkconstants.DISABLED
 
         self.list_dir = Tkinter.Listbox(self)
         self.list_dir["width"] = 50
@@ -67,6 +89,8 @@ class Editor(Tkinter.Frame):
         options['parent'] = root
         options['title'] = "Select a directory to load into the Nautilus API"
         self.directories = []
+        self.running = False
+        
 
     def make_app(self):
         self.app = Flask("nautilus-app")
@@ -75,12 +99,17 @@ class Editor(Tkinter.Frame):
             request.environ.get('werkzeug.server.shutdown')()
             return 'Server shutting down...'
 
+        self.logger = WidgetLogger(self.text)
         resolver = NautilusCTSResolver(resource=self.directories)
+        resolver.logger.addHandler(self.logger)
         resolver.parse()
-        self.nautilus = FlaskNautilus(resolver=resolver, app=self.app)
+        self.nautilus = FlaskNautilus(prefix="/api", resolver=resolver, app=self.app)
+        self.nemo = Nemo(base_url="", resolver=resolver, app=self.app)
+        self.nautilus.logger.addHandler(self.logger)
+        self.nautilus.logger.setLevel(logging.DEBUG)
 
     def open_server(self):
-        webbrowser.open_new("http://127.0.0.1:5000/cts")
+        webbrowser.open_new("http://127.0.0.1:5000/api/cts")
 
     def askdirectory(self):
         """ Returns a selected directoryname.
@@ -124,8 +153,10 @@ class Editor(Tkinter.Frame):
     def print(self, line):
         """ Print to the window
         """
+        self.text.config(state=Tkconstants.NORMAL)
         self.text.insert("end", line)
         self.text.insert("end", "\n")
+        self.text.config(state=Tkconstants.DISABLED)
 
     def runserver(self):
         """ Run the flask server
@@ -137,13 +168,21 @@ class Editor(Tkinter.Frame):
         self.stop_button.config(state=Tkconstants.NORMAL)
         self.open_server_button.config(state=Tkconstants.NORMAL)
         self.start_button.config(state=Tkconstants.DISABLED)
+        self.running = True
+
+    def stop(self):
+        #requests.get()
+        thread = StoppableThread(target=requests.get, args=("http://127.0.0.1:5000/shutdown", ))
+        thread.start()
+        thread.stop()
+        self.thread.stop()
+        self.running = False
 
     def stopserver(self):
         """ Stop the server
         """
         # There should be a better way to do this
-        webbrowser.open_new("http://127.0.0.1:5000/shutdown")
-        self.thread.stop()
+        self.stop()
         self.start_button.config(state=Tkconstants.NORMAL)
         self.open_server_button.config(state=Tkconstants.DISABLED)
         self.stop_button.config(state=Tkconstants.DISABLED)
@@ -151,7 +190,13 @@ class Editor(Tkinter.Frame):
     @staticmethod
     def run():
         root = Tkinter.Tk()
-        Editor(root).pack()
+        editor = Editor(root)
+        editor.pack()
+        def destroy():
+            if editor.running is True:
+                editor.stop()
+            sys.exit()
+        root.protocol("WM_DELETE_WINDOW", destroy)
         root.mainloop()
 
 if __name__ == '__main__':
