@@ -66,14 +66,18 @@ class Editor(Tkinter.Frame):
         options['mustexist'] = True
         options['parent'] = root
         options['title'] = "Select a directory to load into the Nautilus API"
+        self.directories = []
 
+    def make_app(self):
         self.app = Flask("nautilus-app")
-
         @self.app.route('/shutdown', methods=['GET'])
         def shutdown():
             request.environ.get('werkzeug.server.shutdown')()
             return 'Server shutting down...'
-        self.directories = []
+
+        resolver = NautilusCTSResolver(resource=self.directories)
+        resolver.parse()
+        self.nautilus = FlaskNautilus(resolver=resolver, app=self.app)
 
     def open_server(self):
         webbrowser.open_new("http://127.0.0.1:5000/cts")
@@ -126,9 +130,7 @@ class Editor(Tkinter.Frame):
     def runserver(self):
         """ Run the flask server
         """
-        resolver = NautilusCTSResolver(resource=self.directories)
-        resolver.parse()
-        self.nautilus = FlaskNautilus(resolver=resolver, app=self.app)
+        self.make_app()
         self.thread = StoppableThread(target=self.app.run, kwargs=dict(host="127.0.0.1", port=5000))
         self.thread.start()
 
